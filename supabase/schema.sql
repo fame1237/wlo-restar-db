@@ -6,7 +6,7 @@ create extension if not exists pgcrypto;
 create table if not exists public.demons (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(btrim(name)) between 2 and 80),
-  element text not null check (element in ('earth', 'water', 'wind', 'fire')),
+  element text not null check (element in ('earth', 'water', 'wind', 'fire', 'unknown')),
   created_by uuid references auth.users (id) on delete set null default auth.uid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

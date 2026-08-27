@@ -35,6 +35,9 @@
   --fire: #f0645b;
   --fire-soft: #291313;
   --fire-line: #743431;
+  --unknown: #aeb4c2;
+  --unknown-soft: #1a1d24;
+  --unknown-line: #4a505e;
   --radius-sm: 7px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -226,7 +229,29 @@ button, input, select { -webkit-tap-highlight-color: transparent; }
 .daily-saved-main .element-badge { width: auto; min-width: 60px; flex: 0 0 auto; }
 .daily-row-actions { display: flex; justify-content: flex-end; gap: 3px; }
 .daily-row.is-empty { color: var(--text-4); }
+.daily-row.is-empty.is-selectable { color: var(--text-3); }
 .daily-empty-copy { font-size: 0.78rem; }
+.daily-empty-action {
+  grid-column: 2 / -1;
+  width: 100%;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0 10px;
+  color: var(--text-3);
+  background: transparent;
+  border: 1px dashed transparent;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-align: left;
+  transition: color var(--speed), background var(--speed), border-color var(--speed);
+}
+.daily-empty-action svg { width: 16px; height: 16px; flex: 0 0 auto; fill: currentColor; }
+.daily-empty-action:hover { color: #c8beff; background: rgba(124, 92, 255, 0.08); border-color: rgba(124, 92, 255, 0.38); }
+.daily-empty-action:focus-visible { color: #d9d2ff; background: rgba(124, 92, 255, 0.1); border-color: var(--accent); }
 .daily-field { position: relative; min-width: 0; display: grid; gap: 6px; }
 .daily-field > label { color: var(--text-3); font-size: 0.69rem; line-height: 1; font-weight: 660; }
 .daily-field input, .daily-field select {
@@ -290,6 +315,7 @@ button, input, select { -webkit-tap-highlight-color: transparent; }
   font-size: 0.68rem;
 }
 .daily-form-help svg { width: 15px; height: 15px; flex: 0 0 auto; fill: currentColor; }
+.daily-form-cancel { flex: 0 0 auto; margin-left: auto; }
 
 .search-panel {
   display: grid;
@@ -428,10 +454,12 @@ button, input, select { -webkit-tap-highlight-color: transparent; }
 .filter-chip.element-water { color: var(--water); }
 .filter-chip.element-wind { color: var(--wind); }
 .filter-chip.element-fire { color: var(--fire); }
+.filter-chip.element-unknown { color: var(--unknown); }
 .filter-chip.element-earth:not(.is-active) > span,
 .filter-chip.element-water:not(.is-active) > span,
 .filter-chip.element-wind:not(.is-active) > span,
-.filter-chip.element-fire:not(.is-active) > span { color: var(--text-3); }
+.filter-chip.element-fire:not(.is-active) > span,
+.filter-chip.element-unknown:not(.is-active) > span { color: var(--text-3); }
 
 .sort-control {
   position: relative;
@@ -561,7 +589,7 @@ tr:hover .action-button, tr:focus-within .action-button, .demon-card:hover .acti
 .field-error:empty { display: none; }
 .element-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
 .element-picker legend { margin-bottom: 9px; }
-.element-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.element-options { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .element-option { min-width: 0; }
 .element-option input { position: absolute; opacity: 0; pointer-events: none; }
 .radio-ui { min-height: 92px; display: grid; place-items: center; align-content: center; gap: 3px; padding: 10px 6px; color: var(--text-2); background: var(--bg-elevated); border: 1px solid var(--line); border-radius: var(--radius-md); cursor: pointer; transition: color var(--speed), background var(--speed), border-color var(--speed), box-shadow var(--speed); }
@@ -576,6 +604,7 @@ tr:hover .action-button, tr:focus-within .action-button, .demon-card:hover .acti
 .element-option.element-water { --row-color: var(--water); --row-soft: var(--water-soft); --row-line: var(--water-line); }
 .element-option.element-wind { --row-color: var(--wind); --row-soft: var(--wind-soft); --row-line: var(--wind-line); }
 .element-option.element-fire { --row-color: var(--fire); --row-soft: var(--fire-soft); --row-line: var(--fire-line); }
+.element-option.element-unknown { --row-color: var(--unknown); --row-soft: var(--unknown-soft); --row-line: var(--unknown-line); }
 .modal-footer { display: flex; justify-content: flex-end; gap: 9px; padding: 16px 22px; background: var(--bg-elevated); border-top: 1px solid var(--line); }
 .auth-fields { gap: 16px; }
 .auth-actions .button { width: 100%; }

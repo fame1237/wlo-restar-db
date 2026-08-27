@@ -1,6 +1,6 @@
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 
-type ElementKey = "earth" | "water" | "wind" | "fire";
+type ElementKey = "earth" | "water" | "wind" | "fire" | "unknown";
 type ElementFilter = ElementKey | "all";
 type SortKey = `name-${"asc" | "desc"}` | "updated-desc";
 
@@ -94,6 +94,13 @@ const ELEMENTS: Record<
     soft: "#291313",
     line: "#743431",
     icon: '<path d="M13.35 2.2c.56 3.18-.28 4.9-1.75 6.12.08-1.56-.66-2.84-1.84-3.74.06 3-4.26 5.35-4.26 10.2A6.5 6.5 0 0 0 12 21.3a6.5 6.5 0 0 0 6.5-6.52c0-4.23-2.36-9.67-5.15-12.58Zm-1.36 16.6a3.62 3.62 0 0 1-3.61-3.63c0-1.54.8-2.68 1.65-3.78.45.7.92 1.5 1.24 2.5 1.9-1 2.83-2.43 3.08-3.95a12.2 12.2 0 0 1 1.25 5.23 3.62 3.62 0 0 1-3.61 3.63Z" />',
+  },
+  unknown: {
+    label: "ยังไม่รู้",
+    css: "#aeb4c2",
+    soft: "#1a1d24",
+    line: "#4a505e",
+    icon: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" /><path d="M9.65 9.1a2.55 2.55 0 0 1 4.9.98c0 1.92-2.55 2.05-2.55 3.7M12 17.35h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />',
   },
 };
 
@@ -615,13 +622,6 @@ function dailyDuplicateForSlot(demonId: string, slot: number): boolean {
   );
 }
 
-function nextDailySlot(): number | null {
-  for (let slot = 1; slot <= DAILY_LIMIT; slot += 1) {
-    if (!state.dailyRecords.some((record) => record.slot === slot)) return slot;
-  }
-  return null;
-}
-
 function resetDailyFormState(): void {
   state.dailyEditingSlot = null;
   state.dailyName = "";
@@ -657,10 +657,18 @@ function dailySavedRow(slot: number, dailyRecord: DailyRecord, demon: DemonRecor
 }
 
 function dailyEmptyRow(slot: number): string {
-  const copy = canWrite() ? "ยังไม่ได้เลือกปีศาจ" : "รอผู้ดูแลเพิ่มรายชื่อ";
+  if (canWrite()) {
+    return `<div class="daily-row is-empty is-selectable" data-daily-slot="${slot}">
+        <span class="daily-row-number" aria-hidden="true">${slot}</span>
+        <button class="daily-empty-action" type="button" data-action="choose-daily-slot" data-slot="${slot}" aria-label="เพิ่มปีศาจในช่องที่ ${slot}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5a1 1 0 1 0-2 0v6H5a1 1 0 1 0 0 2h6v6a1 1 0 1 0 2 0v-6h6a1 1 0 1 0 0-2h-6V5Z" /></svg>
+          <span>เพิ่มปีศาจในช่องนี้</span>
+        </button>
+      </div>`;
+  }
   return `<div class="daily-row is-empty" data-daily-slot="${slot}">
       <span class="daily-row-number" aria-hidden="true">${slot}</span>
-      <span class="daily-empty-copy">${copy}</span>
+      <span class="daily-empty-copy">รอผู้ดูแลเพิ่มรายชื่อ</span>
     </div>`;
 }
 
@@ -707,7 +715,8 @@ function dailyFormRow(slot: number): string {
     )
     .join("");
   const selectedStyle = selected ? recordStyle(selected) : "";
-  const actionLabel = state.dailyEditingSlot ? "บันทึกการเปลี่ยน" : "เพิ่มในวันนี้";
+  const editingExisting = state.dailyRecords.some((record) => record.slot === slot);
+  const actionLabel = editingExisting ? "บันทึกการเปลี่ยน" : "เพิ่มในวันนี้";
 
   return `<form class="daily-row is-form" data-daily-form data-slot="${slot}" novalidate>
       <span class="daily-row-number" aria-hidden="true">${slot}</span>
@@ -729,6 +738,7 @@ function dailyFormRow(slot: number): string {
       <div class="daily-form-help">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm1 10.5a1 1 0 1 1-2 0v-5a1 1 0 1 1 2 0v5Z" /></svg>
         <span>ชื่อใหม่จะถูกเพิ่มในรายชื่อหลักอัตโนมัติ</span>
+        <button class="text-button daily-form-cancel" type="button" data-action="cancel-daily-slot">ยกเลิก</button>
       </div>
     </form>`;
 }
@@ -748,8 +758,7 @@ function renderDaily(): void {
     return;
   }
 
-  const nextSlot = canWrite() ? nextDailySlot() : null;
-  const formSlot = canWrite() ? state.dailyEditingSlot ?? nextSlot : null;
+  const formSlot = canWrite() ? state.dailyEditingSlot : null;
   const rows: string[] = [];
   for (let slot = 1; slot <= DAILY_LIMIT; slot += 1) {
     const dailyRecord = state.dailyRecords.find((record) => record.slot === slot);
@@ -944,6 +953,28 @@ function startDailyEdit(slot: number): void {
   state.dailySelectedDemonId = demon.id;
   renderDaily();
   window.requestAnimationFrame(() => document.querySelector<HTMLInputElement>("#daily-name")?.focus());
+}
+
+function startDailySlot(slot: number): void {
+  if (!requireWriteAccess()) return;
+  if (!Number.isInteger(slot) || slot < 1 || slot > DAILY_LIMIT) return;
+  if (state.dailyRecords.some((record) => record.slot === slot)) return;
+  resetDailyFormState();
+  state.dailyEditingSlot = slot;
+  renderDaily();
+  window.requestAnimationFrame(() => document.querySelector<HTMLInputElement>("#daily-name")?.focus());
+}
+
+function cancelDailySlot(): void {
+  const slot = state.dailyEditingSlot;
+  resetDailyFormState();
+  renderDaily();
+  if (!slot) return;
+  window.requestAnimationFrame(() => {
+    document
+      .querySelector<HTMLButtonElement>(`[data-action="choose-daily-slot"][data-slot="${slot}"]`)
+      ?.focus();
+  });
 }
 
 async function submitDailyForm(event: SubmitEvent): Promise<void> {
@@ -1562,6 +1593,10 @@ document.addEventListener("click", (event) => {
     if (action === "close-auth") closeAuth();
     if (action === "sign-out" && actionTarget instanceof HTMLButtonElement) void signOut(actionTarget);
     if (action === "retry-daily") void refreshDailyRecords();
+    if (action === "choose-daily-slot" && actionTarget.dataset.slot) {
+      startDailySlot(Number(actionTarget.dataset.slot));
+    }
+    if (action === "cancel-daily-slot") cancelDailySlot();
     if (action === "edit-daily" && actionTarget.dataset.slot) {
       startDailyEdit(Number(actionTarget.dataset.slot));
     }
