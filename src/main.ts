@@ -65,13 +65,41 @@ const supabase: SupabaseClient | null =
 
 const ELEMENTS: Record<
   ElementKey,
-  { label: string; css: string; soft: string; line: string }
+  { label: string; css: string; soft: string; line: string; icon: string }
 > = {
-  earth: { label: "ดิน", css: "#e6b43c", soft: "#211c10", line: "#665326" },
-  water: { label: "น้ำ", css: "#4299ff", soft: "#101d2d", line: "#274d76" },
-  wind: { label: "ลม", css: "#58bf8b", soft: "#10241b", line: "#2b6548" },
-  fire: { label: "ไฟ", css: "#f0645b", soft: "#291313", line: "#743431" },
+  earth: {
+    label: "ดิน",
+    css: "#e6b43c",
+    soft: "#211c10",
+    line: "#665326",
+    icon: '<path d="M2.65 18.15 8.3 8.45a1.35 1.35 0 0 1 2.34 0l2.18 3.75 1.08-1.86a1.35 1.35 0 0 1 2.34 0l5.11 7.81A1.35 1.35 0 0 1 20.18 20H3.82a1.35 1.35 0 0 1-1.17-1.85Z" />',
+  },
+  water: {
+    label: "น้ำ",
+    css: "#4299ff",
+    soft: "#101d2d",
+    line: "#274d76",
+    icon: '<path d="M12 2.3S5.5 9.72 5.5 14.6a6.5 6.5 0 0 0 13 0C18.5 9.72 12 2.3 12 2.3Zm0 16.1a3.82 3.82 0 0 1-3.8-3.8c0-.62.24-1.47.7-2.45.18 2.25 1.42 3.75 3.73 4.5a1 1 0 0 1-.63 1.75Z" />',
+  },
+  wind: {
+    label: "ลม",
+    css: "#58bf8b",
+    soft: "#10241b",
+    line: "#2b6548",
+    icon: '<path d="M3 8h10.2a2.8 2.8 0 1 0-2.45-4.15M3 12h17M3 16h11.2a2.8 2.8 0 1 1-2.45 4.15" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />',
+  },
+  fire: {
+    label: "ไฟ",
+    css: "#f0645b",
+    soft: "#291313",
+    line: "#743431",
+    icon: '<path d="M13.35 2.2c.56 3.18-.28 4.9-1.75 6.12.08-1.56-.66-2.84-1.84-3.74.06 3-4.26 5.35-4.26 10.2A6.5 6.5 0 0 0 12 21.3a6.5 6.5 0 0 0 6.5-6.52c0-4.23-2.36-9.67-5.15-12.58Zm-1.36 16.6a3.62 3.62 0 0 1-3.61-3.63c0-1.54.8-2.68 1.65-3.78.45.7.92 1.5 1.24 2.5 1.9-1 2.83-2.43 3.08-3.95a12.2 12.2 0 0 1 1.25 5.23 3.62 3.62 0 0 1-3.61 3.63Z" />',
+  },
 };
+
+function elementIconSvg(element: ElementKey): string {
+  return `<svg class="element-icon" viewBox="0 0 24 24" aria-hidden="true">${ELEMENTS[element].icon}</svg>`;
+}
 
 const SAMPLE_DATA: Array<readonly [string, ElementKey]> = [
   ["กระป๋องเหล็ก", "earth"],
@@ -620,8 +648,10 @@ function dailySavedRow(slot: number, dailyRecord: DailyRecord, demon: DemonRecor
     : "";
   return `<div class="daily-row" data-daily-slot="${slot}" style="${recordStyle(demon)}">
       <span class="daily-row-number" aria-hidden="true">${slot}</span>
-      <span class="daily-saved-name">${escapeHtml(demon.name)}</span>
-      <span class="element-badge"><i aria-hidden="true"></i>${element.label}</span>
+      <span class="daily-saved-main">
+        <span class="daily-saved-name">${escapeHtml(demon.name)}</span>
+        <span class="element-badge">${elementIconSvg(demon.element)}${element.label}</span>
+      </span>
       ${actions}
     </div>`;
 }
@@ -805,7 +835,7 @@ function updateDailySuggestions(form: HTMLFormElement): void {
             <strong>${escapeHtml(normalizeDemonName(record.name))}</strong>
             <small>${duplicate ? "อยู่ในรายการวันนี้แล้ว" : "มีอยู่ในระบบแล้ว"}</small>
           </span>
-          <span class="element-badge"><i aria-hidden="true"></i>${element.label}</span>
+          <span class="element-badge">${elementIconSvg(record.element)}${element.label}</span>
         </button>`;
     })
     .join("");
@@ -1082,13 +1112,21 @@ function actionButtons(record: DemonRecord): string {
     </div>`;
 }
 
-function tableRow(record: DemonRecord, groupKey?: string, collapsed = false): string {
+function tableRow(
+  record: DemonRecord,
+  groupKey?: string,
+  collapsed = false,
+): string {
   const element = ELEMENTS[record.element];
   const actionCell = canWrite() ? `<td>${actionButtons(record)}</td>` : "";
   return `
-    <tr style="${recordStyle(record)}"${groupKey ? ` data-group-member="${groupKey}"` : ""}${collapsed ? " hidden" : ""}>
-      <td><div class="demon-name"><span>${highlightMatch(record.name)}</span></div></td>
-      <td><span class="element-badge"><i aria-hidden="true"></i>${element.label}</span></td>
+    <tr class="directory-item" style="${recordStyle(record)}"${groupKey ? ` data-group-member="${groupKey}"` : ""}${collapsed ? " hidden" : ""}>
+      <td>
+        <div class="demon-name-cluster">
+          <div class="demon-name"><span>${highlightMatch(record.name)}</span></div>
+          <span class="element-badge">${elementIconSvg(record.element)}${element.label}</span>
+        </div>
+      </td>
       ${actionCell}
     </tr>`;
 }
@@ -1099,7 +1137,7 @@ function mobileCard(record: DemonRecord, groupKey?: string, collapsed = false): 
     <article class="demon-card" style="${recordStyle(record)}"${groupKey ? ` data-group-member="${groupKey}"` : ""}${collapsed ? " hidden" : ""}>
       <div class="demon-card-main">
         <div class="demon-name"><span>${highlightMatch(record.name)}</span></div>
-        <div class="demon-card-meta"><span class="element-badge"><i aria-hidden="true"></i>${element.label}</span></div>
+        <div class="demon-card-meta"><span class="element-badge">${elementIconSvg(record.element)}${element.label}</span></div>
       </div>
       ${actionButtons(record)}
     </article>`;
@@ -1109,7 +1147,7 @@ function tableGroup(group: RecordGroup): string {
   const collapsed = state.collapsedGroups.has(group.key);
   return `
     <tr class="alphabet-row" id="alpha-table-${group.key}">
-      <th colspan="${canWrite() ? "3" : "2"}" scope="rowgroup">
+      <th colspan="${canWrite() ? "2" : "1"}" scope="rowgroup">
         <button class="group-toggle${collapsed ? " is-collapsed" : ""}" type="button" data-group-key="${group.key}" aria-expanded="${String(!collapsed)}" aria-label="${collapsed ? "ขยาย" : "ยุบ"}กลุ่มตัวอักษร ${escapeHtml(group.letter)}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7.4 9.4 4.6 4.6 4.6-4.6a1 1 0 1 1 1.4 1.4l-5.3 5.3a1 1 0 0 1-1.4 0L6 10.8a1 1 0 0 1 1.4-1.4Z" /></svg>
           <span class="group-prefix" aria-hidden="true">กลุ่ม</span>
