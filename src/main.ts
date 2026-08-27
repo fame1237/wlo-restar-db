@@ -45,10 +45,10 @@ const ELEMENTS: Record<
   ElementKey,
   { label: string; css: string; soft: string; line: string }
 > = {
-  earth: { label: "ดิน", css: "#aa7408", soft: "#fff5d6", line: "#f1d27b" },
-  water: { label: "น้ำ", css: "#1670c7", soft: "#e7f3ff", line: "#a8d4f7" },
-  wind: { label: "ลม", css: "#18825c", soft: "#e7f8f0", line: "#a9dfc8" },
-  fire: { label: "ไฟ", css: "#c94035", soft: "#fff0ee", line: "#f4b8b2" },
+  earth: { label: "ดิน", css: "#e6b43c", soft: "#211c10", line: "#665326" },
+  water: { label: "น้ำ", css: "#4299ff", soft: "#101d2d", line: "#274d76" },
+  wind: { label: "ลม", css: "#58bf8b", soft: "#10241b", line: "#2b6548" },
+  fire: { label: "ไฟ", css: "#f0645b", soft: "#291313", line: "#743431" },
 };
 
 const SAMPLE_DATA: Array<readonly [string, ElementKey]> = [
@@ -91,6 +91,7 @@ const state: {
   deletingId: string | null;
   session: Session | null;
   collapsedGroups: Set<string>;
+  activeAlphabetKey: string | null;
 } = {
   records: supabase ? [] : loadLocalRecords(),
   query: "",
@@ -100,6 +101,7 @@ const state: {
   deletingId: null,
   session: null,
   collapsedGroups: new Set<string>(),
+  activeAlphabetKey: null,
 };
 const thaiCollator = new Intl.Collator("th-TH", { sensitivity: "base", numeric: true });
 
@@ -383,7 +385,8 @@ function tableGroup(group: RecordGroup): string {
       <th colspan="${canWrite() ? "3" : "2"}" scope="rowgroup">
         <button class="group-toggle${collapsed ? " is-collapsed" : ""}" type="button" data-group-key="${group.key}" aria-expanded="${String(!collapsed)}" aria-label="${collapsed ? "ขยาย" : "ยุบ"}กลุ่มตัวอักษร ${escapeHtml(group.letter)}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7.4 9.4 4.6 4.6 4.6-4.6a1 1 0 1 1 1.4 1.4l-5.3 5.3a1 1 0 0 1-1.4 0L6 10.8a1 1 0 0 1 1.4-1.4Z" /></svg>
-          <span>${escapeHtml(group.letter)}</span>
+          <span class="group-prefix" aria-hidden="true">กลุ่ม</span>
+          <span class="group-letter">${escapeHtml(group.letter)}</span>
           <small>${group.records.length.toLocaleString("th-TH")} รายการ</small>
         </button>
       </th>
@@ -397,7 +400,8 @@ function mobileGroup(group: RecordGroup): string {
     <div class="alphabet-card-header" id="alpha-card-${group.key}">
       <button class="group-toggle${collapsed ? " is-collapsed" : ""}" type="button" data-group-key="${group.key}" aria-expanded="${String(!collapsed)}" aria-label="${collapsed ? "ขยาย" : "ยุบ"}กลุ่มตัวอักษร ${escapeHtml(group.letter)}">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7.4 9.4 4.6 4.6 4.6-4.6a1 1 0 1 1 1.4 1.4l-5.3 5.3a1 1 0 0 1-1.4 0L6 10.8a1 1 0 0 1 1.4-1.4Z" /></svg>
-        <span>${escapeHtml(group.letter)}</span>
+        <span class="group-prefix" aria-hidden="true">กลุ่ม</span>
+        <span class="group-letter">${escapeHtml(group.letter)}</span>
         <small>${group.records.length.toLocaleString("th-TH")} รายการ</small>
       </button>
     </div>
@@ -411,7 +415,7 @@ function renderAlphabetNav(groups: RecordGroup[], visibleRecords: DemonRecord[])
     ? groups
         .map(
           (group) =>
-            `<button type="button" data-alpha-key="${group.key}" aria-label="ไปยังรายชื่อขึ้นต้นด้วย ${escapeHtml(group.letter)}">${escapeHtml(group.letter)}</button>`,
+            `<button class="${state.activeAlphabetKey === group.key ? "is-active" : ""}" type="button" data-alpha-key="${group.key}" aria-label="ไปยังรายชื่อขึ้นต้นด้วย ${escapeHtml(group.letter)}"${state.activeAlphabetKey === group.key ? ' aria-current="true"' : ""}>${escapeHtml(group.letter)}</button>`,
         )
         .join("")
     : "";
@@ -521,6 +525,7 @@ async function refreshCloudRecords(): Promise<void> {
 function clearFilters(): void {
   state.query = "";
   state.element = "all";
+  state.activeAlphabetKey = null;
   dom.searchInput.value = "";
   updateActiveFilter();
   render();
@@ -797,6 +802,7 @@ document.addEventListener("click", (event) => {
     const element = filterButton.dataset.element;
     if (element === "all" || isElementKey(element)) {
       state.element = element;
+      state.activeAlphabetKey = null;
       updateActiveFilter();
       render();
     }
@@ -808,6 +814,7 @@ document.addEventListener("click", (event) => {
     if (column === "name") {
       const currentlyAscending = state.sort === `${column}-asc`;
       state.sort = `${column}-${currentlyAscending ? "desc" : "asc"}`;
+      state.activeAlphabetKey = null;
       render();
     }
   }
@@ -823,7 +830,9 @@ document.addEventListener("click", (event) => {
   const alphabetButton = event.target.closest<HTMLButtonElement>("[data-alpha-key]");
   if (alphabetButton?.dataset.alphaKey) {
     const key = alphabetButton.dataset.alphaKey;
-    if (state.collapsedGroups.delete(key)) render();
+    state.activeAlphabetKey = key;
+    state.collapsedGroups.delete(key);
+    render();
     window.requestAnimationFrame(() => {
       const prefix = window.matchMedia("(max-width: 680px)").matches ? "alpha-card" : "alpha-table";
       const target = document.getElementById(`${prefix}-${key}`);
@@ -835,6 +844,7 @@ document.addEventListener("click", (event) => {
 
 dom.searchInput.addEventListener("input", () => {
   state.query = dom.searchInput.value;
+  state.activeAlphabetKey = null;
   render();
 });
 document.addEventListener("keydown", (event) => {
@@ -848,6 +858,7 @@ dom.clearFilterButton.addEventListener("click", clearFilters);
 dom.sortSelect.addEventListener("change", () => {
   if (!isSortKey(dom.sortSelect.value)) return;
   state.sort = dom.sortSelect.value;
+  state.activeAlphabetKey = null;
   render();
 });
 dom.demonForm.addEventListener("submit", (event) => void saveForm(event));

@@ -7,7 +7,7 @@
       name="description"
       content="ระบบจัดการข้อมูลชื่อปีศาจและธาตุ ค้นหา เพิ่ม แก้ไข และลบข้อมูลได้ง่าย"
     />
-    <meta name="theme-color" content="#171624" />
+    <meta name="theme-color" content="#090a0d" />
     <title>ปีศาจรีไซเคิล — ฐานข้อมูลธาตุ</title>
     <link
       rel="icon"
@@ -44,13 +44,14 @@
           <section class="search-panel" aria-label="ค้นหาปีศาจ">
             <div class="search-intro">
               <h2>ค้นหาด้วยชื่อ</h2>
-              <p>พิมพ์ชื่อ หรือกด Ctrl + K</p>
+              <p>พิมพ์ชื่อบางส่วนได้</p>
             </div>
             <div class="search-actions">
               <div class="search-field">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.7 19.3-4.2-4.2a7.5 7.5 0 1 0-1.4 1.4l4.2 4.2a1 1 0 0 0 1.4-1.4ZM5 10.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" /></svg>
                 <label class="sr-only" for="search-input">ค้นหาชื่อปีศาจ</label>
-                <input id="search-input" type="search" placeholder="เช่น กระป๋องเหล็ก" autocomplete="off" aria-keyshortcuts="Control+K" />
+                <input id="search-input" type="search" placeholder="พิมพ์ชื่อปีศาจ" autocomplete="off" aria-keyshortcuts="Control+K" />
+                <kbd class="search-shortcut" aria-hidden="true"><span>Ctrl</span><i>+</i><span>K</span></kbd>
               </div>
               <button class="button button-primary primary-add" type="button" data-action="add" aria-label="เพิ่มปีศาจ" hidden>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5a1 1 0 1 0-2 0v6H5a1 1 0 1 0 0 2h6v6a1 1 0 1 0 2 0v-6h6a1 1 0 1 0 0-2h-6V5Z" /></svg>
@@ -108,8 +109,7 @@
                       <button class="column-sort is-active" type="button" data-sort="name">
                         ชื่อปีศาจ
                         <svg class="column-sort-icon" viewBox="0 0 24 24" aria-hidden="true">
-                          <path class="sort-arrow" d="M6 4a1 1 0 0 1 1 1v11.6l2.3-2.3a1 1 0 0 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.4L5 16.6V5a1 1 0 0 1 1-1Z" />
-                          <path d="M13 6a1 1 0 0 1 1-1h7a1 1 0 1 1 0 2h-7a1 1 0 0 1-1-1Zm0 6a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2h-5a1 1 0 0 1-1-1Zm0 6a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Z" />
+                          <path d="M12 19V5m0 0-5 5m5-5 5 5" />
                         </svg>
                       </button>
                     </th>
@@ -138,7 +138,6 @@
       <form id="demon-form" method="dialog" novalidate>
         <div class="modal-header">
           <div>
-            <p class="eyebrow">Demon profile</p>
             <h2 id="form-title">เพิ่มปีศาจ</h2>
             <p id="form-description">กรอกชื่อและเลือกธาตุประจำตัว</p>
           </div>
@@ -221,7 +220,6 @@
       <form id="auth-form" novalidate>
         <div class="modal-header">
           <div>
-            <p class="eyebrow">Team access</p>
             <h2 id="auth-title">เข้าสู่ระบบผู้ดูแล</h2>
             <p>เฉพาะบัญชีผู้ดูแลเท่านั้นที่เพิ่ม แก้ไข และลบข้อมูลได้</p>
           </div>
