@@ -80,3 +80,60 @@ for delete
 to authenticated
 using ((select public.is_demondex_admin()));
 
+-- รายการปีศาจประจำวัน (สูงสุด 5 ตัวต่อวันตามเวลาไทย)
+create or replace function public.normalize_demon_name(input_name text)
+returns text
+language sql
+immutable
+strict
+set search_path = ''
+as $$
+  select btrim(regexp_replace(btrim(input_name), '^ปีศาจ[[:space:]]*', '', ''));
+$$;
+
+create unique index if not exists demons_name_normalized_unique
+  on public.demons (lower(public.normalize_demon_name(name)));
+
+create table if not exists public.daily_demons (
+  id uuid primary key default gen_random_uuid(),
+  active_date date not null default ((now() at time zone 'Asia/Bangkok')::date),
+  slot smallint not null check (slot between 1 and 5),
+  demon_id uuid not null references public.demons (id) on delete cascade,
+  is_new_demon boolean not null default false,
+  created_by uuid references auth.users (id) on delete set null default auth.uid(),
+  created_at timestamptz not null default now(),
+  unique (active_date, slot),
+  unique (active_date, demon_id)
+);
+
+alter table public.daily_demons
+  add column if not exists is_new_demon boolean not null default false;
+
+create index if not exists daily_demons_active_date_idx
+  on public.daily_demons (active_date, slot);
+
+alter table public.daily_demons enable row level security;
+
+revoke all on table public.daily_demons from anon, authenticated;
+grant select on table public.daily_demons to anon, authenticated;
+grant insert, update, delete on table public.daily_demons to authenticated;
+
+drop policy if exists "daily_demons_are_publicly_readable" on public.daily_demons;
+create policy "daily_demons_are_publicly_readable"
+on public.daily_demons for select to anon, authenticated using (true);
+
+drop policy if exists "admin_can_create_daily_demons" on public.daily_demons;
+create policy "admin_can_create_daily_demons"
+on public.daily_demons for insert to authenticated
+with check ((select public.is_demondex_admin()));
+
+drop policy if exists "admin_can_update_daily_demons" on public.daily_demons;
+create policy "admin_can_update_daily_demons"
+on public.daily_demons for update to authenticated
+using ((select public.is_demondex_admin()))
+with check ((select public.is_demondex_admin()));
+
+drop policy if exists "admin_can_delete_daily_demons" on public.daily_demons;
+create policy "admin_can_delete_daily_demons"
+on public.daily_demons for delete to authenticated
+using ((select public.is_demondex_admin()));

@@ -41,6 +41,30 @@
         <section class="content" id="library" aria-labelledby="library-title">
           <h2 id="library-title" class="sr-only">คลังรายชื่อปีศาจ</h2>
 
+          <section id="daily-panel" class="daily-panel" aria-labelledby="daily-title">
+            <header class="daily-header">
+              <div class="daily-heading">
+                <h2 id="daily-title">ปีศาจประจำวัน</h2>
+                <span id="daily-date" class="daily-date"></span>
+              </div>
+              <div class="daily-meta">
+                <strong id="daily-progress" aria-live="polite">0 จาก 5</strong>
+                <span class="daily-meta-divider" aria-hidden="true"></span>
+                <div id="daily-timing" class="daily-timing">
+                  <span class="daily-time-item">
+                    <small>เวลาไทย</small>
+                    <time id="daily-current-time">--:--:--</time>
+                  </span>
+                  <span class="daily-time-item daily-time-reset">
+                    <small>รีเซ็ตใน</small>
+                    <time id="daily-countdown">--:--:--</time>
+                  </span>
+                </div>
+              </div>
+            </header>
+            <div id="daily-content" class="daily-content" aria-live="polite" aria-busy="true"></div>
+          </section>
+
           <section class="search-panel" aria-label="ค้นหาปีศาจ">
             <div class="search-intro">
               <h2>ค้นหาด้วยชื่อ</h2>
