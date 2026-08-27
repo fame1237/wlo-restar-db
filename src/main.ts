@@ -616,10 +616,10 @@ function getDailyDemon(record: DailyRecord): DemonRecord | undefined {
   return state.records.find((demon) => demon.id === record.demonId);
 }
 
-function dailyDuplicateForSlot(demonId: string, slot: number): boolean {
-  return state.dailyRecords.some(
-    (record) => record.demonId === demonId && record.slot !== slot,
-  );
+function getEditableDailyDemon(slot: number): DemonRecord | undefined {
+  const dailyRecord = state.dailyRecords.find((record) => record.slot === slot);
+  if (!dailyRecord?.isNewDemon) return undefined;
+  return getDailyDemon(dailyRecord);
 }
 
 function resetDailyFormState(): void {
@@ -677,9 +677,16 @@ function dailyFormStatus(slot: number): { html: string; tone: "normal" | "error"
   if (!normalizedName) return { html: "พิมพ์ชื่อบางส่วนเพื่อค้นหา หรือกรอกชื่อใหม่", tone: "normal" };
   if (normalizedName.length < 2) return { html: "ชื่อควรมีอย่างน้อย 2 ตัวอักษร", tone: "error" };
 
+  const editingDemon = getEditableDailyDemon(slot);
   const existing = findDemonByName(normalizedName);
-  if (existing && dailyDuplicateForSlot(existing.id, slot)) {
-    return { html: "ปีศาจตัวนี้อยู่ในรายการวันนี้แล้ว", tone: "error" };
+  if (editingDemon) {
+    if (existing && existing.id !== editingDemon.id) {
+      return { html: "มีชื่อปีศาจนี้อยู่แล้ว กรุณาใช้ชื่ออื่น", tone: "error" };
+    }
+    return {
+      html: `กำลังแก้ไข: <strong>${escapeHtml(normalizedName)}</strong> · บันทึกทับรายการเดิม`,
+      tone: "normal",
+    };
   }
   if (state.dailySelectedDemonId && existing) {
     return {
@@ -697,12 +704,20 @@ function dailyFormStatus(slot: number): { html: string; tone: "normal" | "error"
 function dailyFormIsValid(slot: number): boolean {
   const normalizedName = normalizeDemonName(state.dailyName);
   if (normalizedName.length < 2) return false;
+  const editingDemon = getEditableDailyDemon(slot);
   const existing = findDemonByName(normalizedName);
-  if (existing) return !dailyDuplicateForSlot(existing.id, slot);
+  if (editingDemon) {
+    return (
+      isElementKey(state.dailyElement) &&
+      (!existing || existing.id === editingDemon.id)
+    );
+  }
+  if (existing) return true;
   return isElementKey(state.dailyElement);
 }
 
 function dailyFormRow(slot: number): string {
+  const editingDemon = getEditableDailyDemon(slot);
   const selected = state.dailySelectedDemonId
     ? state.records.find((record) => record.id === state.dailySelectedDemonId)
     : undefined;
@@ -732,12 +747,12 @@ function dailyFormRow(slot: number): string {
           <option value="">เลือกธาตุ</option>
           ${elementOptions}
         </select>
-        <div id="daily-element-note" class="daily-field-note">${selected ? `ใช้ธาตุ${ELEMENTS[selected.element].label}จากข้อมูลเดิม` : "ชื่อใหม่ต้องเลือกธาตุก่อนบันทึก"}</div>
+        <div id="daily-element-note" class="daily-field-note">${selected ? `ใช้ธาตุ${ELEMENTS[selected.element].label}จากข้อมูลเดิม` : editingDemon ? "เปลี่ยนธาตุของรายการนี้ได้" : "ชื่อใหม่ต้องเลือกธาตุก่อนบันทึก"}</div>
       </div>
       <button class="button button-primary daily-submit" type="submit"${dailyFormIsValid(slot) ? "" : " disabled"}>${actionLabel}</button>
       <div class="daily-form-help">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm1 10.5a1 1 0 1 1-2 0v-5a1 1 0 1 1 2 0v5Z" /></svg>
-        <span>ชื่อใหม่จะถูกเพิ่มในรายชื่อหลักอัตโนมัติ</span>
+        <span>${editingDemon ? "บันทึกแล้วจะแทนที่ชื่อและธาตุเดิม" : "ชื่อใหม่จะถูกเพิ่มในรายชื่อหลักอัตโนมัติ"}</span>
         <button class="text-button daily-form-cancel" type="button" data-action="cancel-daily-slot">ยกเลิก</button>
       </div>
     </form>`;
@@ -773,6 +788,7 @@ function renderDaily(): void {
 
 function updateDailyFormControls(form: HTMLFormElement): void {
   const slot = Number(form.dataset.slot);
+  const editingDemon = getEditableDailyDemon(slot);
   const input = form.querySelector<HTMLInputElement>("#daily-name");
   const select = form.querySelector<HTMLSelectElement>("#daily-element");
   const nameNote = form.querySelector<HTMLElement>("#daily-name-note");
@@ -803,7 +819,9 @@ function updateDailyFormControls(form: HTMLFormElement): void {
     select.removeAttribute("aria-label");
     elementField.removeAttribute("style");
     select.value = state.dailyElement;
-    elementNote.textContent = "ชื่อใหม่ต้องเลือกธาตุก่อนบันทึก";
+    elementNote.textContent = editingDemon
+      ? "เปลี่ยนธาตุของรายการนี้ได้"
+      : "ชื่อใหม่ต้องเลือกธาตุก่อนบันทึก";
   }
   submit.disabled = !dailyFormIsValid(slot);
 }
@@ -820,6 +838,11 @@ function updateDailySuggestions(form: HTMLFormElement): void {
   }
 
   const slot = Number(form.dataset.slot);
+  if (getEditableDailyDemon(slot)) {
+    menu.hidden = true;
+    menu.innerHTML = "";
+    return;
+  }
   const matches = state.records
     .filter((record) => normalize(record.name).includes(query))
     .sort((a, b) => {
@@ -838,11 +861,10 @@ function updateDailySuggestions(form: HTMLFormElement): void {
   menu.innerHTML = matches
     .map((record) => {
       const element = ELEMENTS[record.element];
-      const duplicate = dailyDuplicateForSlot(record.id, slot);
-      return `<button class="daily-suggestion" type="button" role="option" data-daily-suggestion-id="${escapeHtml(record.id)}" style="${recordStyle(record)}"${duplicate ? " disabled" : ""}>
+      return `<button class="daily-suggestion" type="button" role="option" data-daily-suggestion-id="${escapeHtml(record.id)}" style="${recordStyle(record)}">
           <span class="daily-suggestion-copy">
             <strong>${escapeHtml(normalizeDemonName(record.name))}</strong>
-            <small>${duplicate ? "อยู่ในรายการวันนี้แล้ว" : "มีอยู่ในระบบแล้ว"}</small>
+            <small>มีอยู่ในระบบแล้ว</small>
           </span>
           <span class="element-badge">${elementIconSvg(record.element)}${element.label}</span>
         </button>`;
@@ -865,10 +887,6 @@ async function saveSuggestedDailyDemon(
   button: HTMLButtonElement,
 ): Promise<void> {
   if (!requireWriteAccess()) return;
-  if (dailyDuplicateForSlot(demon.id, slot)) {
-    showToast(`“${demon.name}” อยู่ในรายการวันนี้แล้ว`, "info");
-    return;
-  }
 
   setBusy(button, true);
   try {
@@ -884,13 +902,13 @@ async function saveSuggestedDailyDemon(
       document.querySelector<HTMLInputElement>("#daily-name")?.focus();
     });
   } catch (error) {
-    const duplicate =
+    const databaseStillBlocksDuplicates =
       typeof error === "object" && error !== null && "code" in error && error.code === "23505";
     showToast(
-      duplicate
-        ? `“${demon.name}” อยู่ในรายการวันนี้แล้ว`
+      databaseStillBlocksDuplicates
+        ? "กรุณารันไฟล์ supabase/allow-daily-duplicates.sql ก่อนเพิ่มชื่อซ้ำ"
         : errorMessage(error, "บันทึกรายชื่อประจำวันไม่สำเร็จ"),
-      duplicate ? "info" : "error",
+      "error",
     );
   } finally {
     if (button.isConnected) setBusy(button, false);
@@ -950,7 +968,7 @@ function startDailyEdit(slot: number): void {
   state.dailyEditingSlot = slot;
   state.dailyName = normalizeDemonName(demon.name);
   state.dailyElement = demon.element;
-  state.dailySelectedDemonId = demon.id;
+  state.dailySelectedDemonId = null;
   renderDaily();
   window.requestAnimationFrame(() => document.querySelector<HTMLInputElement>("#daily-name")?.focus());
 }
@@ -992,6 +1010,9 @@ async function submitDailyForm(event: SubmitEvent): Promise<void> {
 
   const normalizedName = normalizeDemonName(input.value);
   const previousDailyRecord = state.dailyRecords.find((record) => record.slot === slot);
+  const editingDemon = previousDailyRecord?.isNewDemon
+    ? getDailyDemon(previousDailyRecord)
+    : undefined;
   let createdNewDemon = false;
   state.dailyName = input.value;
   if (normalizedName.length < 2) {
@@ -1003,14 +1024,14 @@ async function submitDailyForm(event: SubmitEvent): Promise<void> {
   }
 
   let demon = findDemonByName(normalizedName);
-  if (demon && dailyDuplicateForSlot(demon.id, slot)) {
+  if (editingDemon && demon && demon.id !== editingDemon.id) {
     input.setAttribute("aria-invalid", "true");
-    nameNote.textContent = "ปีศาจตัวนี้อยู่ในรายการวันนี้แล้ว";
+    nameNote.textContent = "มีชื่อปีศาจนี้อยู่แล้ว กรุณาใช้ชื่ออื่น";
     nameNote.classList.add("is-error");
     input.focus();
     return;
   }
-  if (!demon && !isElementKey(state.dailyElement)) {
+  if ((!demon || editingDemon) && !isElementKey(state.dailyElement)) {
     select.setAttribute("aria-invalid", "true");
     elementNote.textContent = "กรุณาเลือกธาตุสำหรับปีศาจใหม่";
     elementNote.classList.add("is-error");
@@ -1022,7 +1043,14 @@ async function submitDailyForm(event: SubmitEvent): Promise<void> {
   const originalLabel = submit.textContent;
   submit.textContent = "กำลังบันทึก...";
   try {
-    if (!demon && isElementKey(state.dailyElement)) {
+    if (editingDemon && isElementKey(state.dailyElement)) {
+      demon = await updateRecord(editingDemon.id, {
+        name: normalizedName,
+        element: state.dailyElement,
+      });
+      const index = state.records.findIndex((record) => record.id === demon?.id);
+      if (index >= 0) state.records[index] = demon;
+    } else if (!demon && isElementKey(state.dailyElement)) {
       try {
         demon = await createRecord({ name: normalizedName, element: state.dailyElement });
         createdNewDemon = true;
@@ -1043,27 +1071,29 @@ async function submitDailyForm(event: SubmitEvent): Promise<void> {
       }
     }
     if (!demon) throw new Error("ไม่พบปีศาจที่ต้องการบันทึก");
-    if (dailyDuplicateForSlot(demon.id, slot)) {
-      showToast(`“${demon.name}” อยู่ในรายการวันนี้แล้ว`, "info");
-      return;
+    if (!editingDemon) {
+      const isNewDemon =
+        createdNewDemon ||
+        Boolean(previousDailyRecord?.isNewDemon && previousDailyRecord.demonId === demon.id);
+      const saved = await saveDailyRecord(slot, demon.id, isNewDemon);
+      state.dailyRecords = [
+        ...state.dailyRecords.filter((record) => record.slot !== slot),
+        saved,
+      ].sort((a, b) => a.slot - b.slot);
     }
-
-    const isNewDemon =
-      createdNewDemon ||
-      Boolean(previousDailyRecord?.isNewDemon && previousDailyRecord.demonId === demon.id);
-    const saved = await saveDailyRecord(slot, demon.id, isNewDemon);
-    state.dailyRecords = [
-      ...state.dailyRecords.filter((record) => record.slot !== slot),
-      saved,
-    ].sort((a, b) => a.slot - b.slot);
     resetDailyFormState();
     render();
-    showToast(`เพิ่ม “${demon.name}” ในรายชื่อวันนี้แล้ว`, "success");
+    showToast(
+      editingDemon
+        ? `แก้ไข “${demon.name}” และแทนที่ข้อมูลเดิมแล้ว`
+        : `เพิ่ม “${demon.name}” ในรายชื่อวันนี้แล้ว`,
+      "success",
+    );
   } catch (error) {
-    const duplicate =
+    const databaseStillBlocksDuplicates =
       typeof error === "object" && error !== null && "code" in error && error.code === "23505";
-    nameNote.textContent = duplicate
-      ? "ปีศาจตัวนี้อยู่ในรายการวันนี้แล้ว"
+    nameNote.textContent = databaseStillBlocksDuplicates
+      ? "กรุณารันไฟล์ supabase/allow-daily-duplicates.sql ก่อนเพิ่มชื่อซ้ำ"
       : errorMessage(error, "บันทึกรายชื่อประจำวันไม่สำเร็จ");
     nameNote.classList.add("is-error");
   } finally {

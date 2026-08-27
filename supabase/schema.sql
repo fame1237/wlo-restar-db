@@ -102,8 +102,7 @@ create table if not exists public.daily_demons (
   is_new_demon boolean not null default false,
   created_by uuid references auth.users (id) on delete set null default auth.uid(),
   created_at timestamptz not null default now(),
-  unique (active_date, slot),
-  unique (active_date, demon_id)
+  unique (active_date, slot)
 );
 
 alter table public.daily_demons
