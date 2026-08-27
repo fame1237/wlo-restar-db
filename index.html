@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="DemonDex ระบบจัดการข้อมูลชื่อปีศาจและธาตุ ค้นหา เพิ่ม แก้ไข และลบข้อมูลได้ง่าย"
+      content="ระบบจัดการข้อมูลชื่อปีศาจและธาตุ ค้นหา เพิ่ม แก้ไข และลบข้อมูลได้ง่าย"
     />
     <meta name="theme-color" content="#171624" />
-    <title>DemonDex — ฐานข้อมูลปีศาจ</title>
+    <title>ปีศาจรีไซเคิล — ฐานข้อมูลธาตุ</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236754d9'/%3E%3Cpath fill='white' d='M7 6l6 4h6l6-4-1 7a10 10 0 11-16 0L7 6zm5 10a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z'/%3E%3C/svg%3E"
@@ -20,35 +20,12 @@
     <a class="skip-link" href="#main-content">ข้ามไปยังเนื้อหา</a>
 
     <div class="app-shell">
-      <aside class="sidebar" aria-label="เมนูหลัก">
-        <a class="brand" href="#" aria-label="DemonDex หน้าหลัก">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32"><path d="M8.2 5.7 13 9.2h6l4.8-3.5-.9 6.2a11 11 0 1 1-13.8 0l-.9-6.2Zm4.1 10.9a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7.4 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM12.5 24a5.1 5.1 0 0 0 7 0h-7Z" /></svg>
-          </span>
-          <span class="brand-copy">
-            <strong>ปีศาจ</strong>
-          </span>
-        </a>
-
-        <nav class="primary-nav" aria-label="ส่วนต่าง ๆ">
-          <a class="nav-item is-active" href="#library" aria-current="page">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H10a3 3 0 0 1 2 .76A3 3 0 0 1 14 3h3.5A2.5 2.5 0 0 1 20 5.5V19a1 1 0 0 1-1.45.9A8.3 8.3 0 0 0 15 19c-1.26 0-2 .38-2 1a1 1 0 1 1-2 0c0-.62-.74-1-2-1a8.3 8.3 0 0 0-3.55.9A1 1 0 0 1 4 19V5.5Zm2 11.99A10.5 10.5 0 0 1 9 17c.75 0 1.42.1 2 .31V6c0-.55-.45-1-1-1H6.5a.5.5 0 0 0-.5.5v11.99ZM13 6v11.31c.58-.2 1.25-.31 2-.31 1.08 0 2.09.2 3 .49V5.5a.5.5 0 0 0-.5-.5H14c-.55 0-1 .45-1 1Z" /></svg>
-            <span>คลังปีศาจ</span>
-          </a>
-        </nav>
-
-      </aside>
-
       <main id="main-content" class="main-content">
         <header class="topbar">
-          <div class="mobile-brand">
-            <span class="brand-mark" aria-hidden="true">
-              <svg viewBox="0 0 32 32"><path d="M8.2 5.7 13 9.2h6l4.8-3.5-.9 6.2a11 11 0 1 1-13.8 0l-.9-6.2Zm4.1 10.9a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7.4 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM12.5 24a5.1 5.1 0 0 0 7 0h-7Z" /></svg>
-            </span>
-            <strong>DemonDex</strong>
-          </div>
-          <div class="page-heading">
-            <h1>ปีศาจรีไซเคิล</h1>
+          <div class="header-context">
+            <div class="page-heading">
+              <h1>ปีศาจรีไซเคิล</h1>
+            </div>
           </div>
           <div class="account-panel">
             <div class="account-copy">
@@ -66,36 +43,26 @@
 
           <section class="search-panel" aria-label="ค้นหาปีศาจ">
             <div class="search-intro">
-              <h2>ค้นหาปีศาจ</h2>
-              <p>พิมพ์ชื่อเพื่อกรองรายการทันที</p>
+              <h2>ค้นหาด้วยชื่อ</h2>
+              <p>พิมพ์ชื่อ หรือกด Ctrl + K</p>
             </div>
             <div class="search-actions">
               <div class="search-field">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.7 19.3-4.2-4.2a7.5 7.5 0 1 0-1.4 1.4l4.2 4.2a1 1 0 0 0 1.4-1.4ZM5 10.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" /></svg>
                 <label class="sr-only" for="search-input">ค้นหาชื่อปีศาจ</label>
-                <input id="search-input" type="search" placeholder="พิมพ์ชื่อปีศาจที่ต้องการ..." autocomplete="off" />
+                <input id="search-input" type="search" placeholder="เช่น กระป๋องเหล็ก" autocomplete="off" aria-keyshortcuts="Control+K" />
               </div>
-              <button class="button button-primary primary-add" type="button" data-action="add" aria-label="เพิ่มปีศาจ">
+              <button class="button button-primary primary-add" type="button" data-action="add" aria-label="เพิ่มปีศาจ" hidden>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5a1 1 0 1 0-2 0v6H5a1 1 0 1 0 0 2h6v6a1 1 0 1 0 2 0v-6h6a1 1 0 1 0 0-2h-6V5Z" /></svg>
                 <span>เพิ่มปีศาจ</span>
               </button>
             </div>
           </section>
 
-          <section class="stats-grid" aria-label="ภาพรวมข้อมูล">
-            <article class="stat-card stat-total">
-              <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 5h12V6H6v2Zm0 5h12v-2H6v2Zm0 5h8v-2H6v2Z" /></svg></span>
-              <div><span>ปีศาจทั้งหมด</span><strong id="total-count">0</strong></div>
-            </article>
-            <article class="stat-card stat-result">
-              <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 5.3-2l4.35 4.35a1 1 0 0 1-1.42 1.42l-4.35-4.35A7.96 7.96 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" /></svg></span>
-              <div><span>ผลลัพธ์ที่พบ</span><strong id="result-count">0</strong></div>
-            </article>
-          </section>
-
           <section class="data-panel" aria-label="รายชื่อปีศาจ">
             <div class="filter-toolbar">
               <div class="filter-scroll" role="group" aria-label="กรองตามธาตุ">
+                <span class="filter-label" aria-hidden="true">กรองธาตุ</span>
                 <button class="filter-chip is-active" type="button" data-element="all" aria-pressed="true">
                   ทั้งหมด <span data-count="all">0</span>
                 </button>
@@ -147,7 +114,7 @@
                       </button>
                     </th>
                     <th scope="col">ธาตุ</th>
-                    <th scope="col"><span class="sr-only">การจัดการ</span></th>
+                    <th scope="col" data-admin-only hidden><span class="sr-only">การจัดการ</span></th>
                   </tr>
                 </thead>
                 <tbody id="demon-table-body"></tbody>

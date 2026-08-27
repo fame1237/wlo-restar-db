@@ -114,8 +114,6 @@ const dom = {
   tableBody: queryRequired<HTMLTableSectionElement>("#demon-table-body"),
   cardList: queryRequired<HTMLElement>("#demon-card-list"),
   emptyState: queryRequired<HTMLElement>("#empty-state"),
-  totalCount: queryRequired<HTMLElement>("#total-count"),
-  resultCount: queryRequired<HTMLElement>("#result-count"),
   summaryText: queryRequired<HTMLElement>("#result-summary-text"),
   sortSelect: queryRequired<HTMLSelectElement>("#sort-select"),
   alphabetNav: queryRequired<HTMLElement>("#alphabet-nav"),
@@ -144,6 +142,7 @@ const dom = {
   accountLabel: queryRequired<HTMLElement>("#account-label"),
   dataModeLabel: queryRequired<HTMLElement>("#data-mode-label"),
   primaryAddButton: queryRequired<HTMLButtonElement>("[data-action='add']"),
+  adminActionHeader: queryRequired<HTMLTableCellElement>("[data-admin-only]"),
   tableWrap: queryRequired<HTMLElement>(".table-wrap"),
 };
 
@@ -340,6 +339,7 @@ function canWrite(): boolean {
 }
 
 function actionButtons(record: DemonRecord): string {
+  if (!canWrite()) return "";
   const safeName = escapeHtml(record.name);
   const safeId = escapeHtml(record.id);
   return `
@@ -355,11 +355,12 @@ function actionButtons(record: DemonRecord): string {
 
 function tableRow(record: DemonRecord, groupKey?: string, collapsed = false): string {
   const element = ELEMENTS[record.element];
+  const actionCell = canWrite() ? `<td>${actionButtons(record)}</td>` : "";
   return `
     <tr style="${recordStyle(record)}"${groupKey ? ` data-group-member="${groupKey}"` : ""}${collapsed ? " hidden" : ""}>
       <td><div class="demon-name"><span>${highlightMatch(record.name)}</span></div></td>
       <td><span class="element-badge"><i aria-hidden="true"></i>${element.label}</span></td>
-      <td>${actionButtons(record)}</td>
+      ${actionCell}
     </tr>`;
 }
 
@@ -379,7 +380,7 @@ function tableGroup(group: RecordGroup): string {
   const collapsed = state.collapsedGroups.has(group.key);
   return `
     <tr class="alphabet-row" id="alpha-table-${group.key}">
-      <th colspan="3" scope="rowgroup">
+      <th colspan="${canWrite() ? "3" : "2"}" scope="rowgroup">
         <button class="group-toggle${collapsed ? " is-collapsed" : ""}" type="button" data-group-key="${group.key}" aria-expanded="${String(!collapsed)}" aria-label="${collapsed ? "ขยาย" : "ยุบ"}กลุ่มตัวอักษร ${escapeHtml(group.letter)}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7.4 9.4 4.6 4.6 4.6-4.6a1 1 0 1 1 1.4 1.4l-5.3 5.3a1 1 0 0 1-1.4 0L6 10.8a1 1 0 0 1 1.4-1.4Z" /></svg>
           <span>${escapeHtml(group.letter)}</span>
@@ -420,9 +421,7 @@ function countByElement(element: ElementKey): number {
   return state.records.filter((record) => record.element === element).length;
 }
 
-function renderCounts(visibleRecords: DemonRecord[]): void {
-  dom.totalCount.textContent = state.records.length.toLocaleString("th-TH");
-  dom.resultCount.textContent = visibleRecords.length.toLocaleString("th-TH");
+function renderCounts(): void {
   document.querySelectorAll<HTMLElement>("[data-count]").forEach((node) => {
     const element = node.dataset.count;
     const count = element === "all" ? state.records.length : isElementKey(element) ? countByElement(element) : 0;
@@ -473,13 +472,17 @@ function render(): void {
   dom.emptyState.hidden = visibleRecords.length !== 0;
   dom.tableWrap.hidden = visibleRecords.length === 0;
   dom.cardList.hidden = visibleRecords.length === 0;
-  renderCounts(visibleRecords);
+  renderCounts();
   renderSummary(visibleRecords);
   renderAlphabetNav(groups, visibleRecords);
   updateSortHeaders();
 }
 
 function syncAuthUi(): void {
+  const writer = canWrite();
+  dom.primaryAddButton.hidden = !writer;
+  dom.adminActionHeader.hidden = !writer;
+
   if (!supabase) {
     dom.authButton.hidden = true;
     dom.accountLabel.textContent = "โหมดทดลอง";
@@ -833,6 +836,13 @@ document.addEventListener("click", (event) => {
 dom.searchInput.addEventListener("input", () => {
   state.query = dom.searchInput.value;
   render();
+});
+document.addEventListener("keydown", (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase("en-US") === "k") {
+    event.preventDefault();
+    dom.searchInput.focus();
+    dom.searchInput.select();
+  }
 });
 dom.clearFilterButton.addEventListener("click", clearFilters);
 dom.sortSelect.addEventListener("change", () => {
