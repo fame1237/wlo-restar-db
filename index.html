@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="DemonDex ระบบจัดการข้อมูลชื่อปีศาจและธาตุ ค้นหา เพิ่ม แก้ไข และลบข้อมูลได้ง่าย"
+    />
+    <meta name="theme-color" content="#171624" />
+    <title>DemonDex — ฐานข้อมูลปีศาจ</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236754d9'/%3E%3Cpath fill='white' d='M7 6l6 4h6l6-4-1 7a10 10 0 11-16 0L7 6zm5 10a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">ข้ามไปยังเนื้อหา</a>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="เมนูหลัก">
+        <a class="brand" href="#" aria-label="DemonDex หน้าหลัก">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M8.2 5.7 13 9.2h6l4.8-3.5-.9 6.2a11 11 0 1 1-13.8 0l-.9-6.2Zm4.1 10.9a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7.4 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM12.5 24a5.1 5.1 0 0 0 7 0h-7Z" /></svg>
+          </span>
+          <span class="brand-copy">
+            <strong>ปีศาจ</strong>
+          </span>
+        </a>
+
+        <nav class="primary-nav" aria-label="ส่วนต่าง ๆ">
+          <a class="nav-item is-active" href="#library" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H10a3 3 0 0 1 2 .76A3 3 0 0 1 14 3h3.5A2.5 2.5 0 0 1 20 5.5V19a1 1 0 0 1-1.45.9A8.3 8.3 0 0 0 15 19c-1.26 0-2 .38-2 1a1 1 0 1 1-2 0c0-.62-.74-1-2-1a8.3 8.3 0 0 0-3.55.9A1 1 0 0 1 4 19V5.5Zm2 11.99A10.5 10.5 0 0 1 9 17c.75 0 1.42.1 2 .31V6c0-.55-.45-1-1-1H6.5a.5.5 0 0 0-.5.5v11.99ZM13 6v11.31c.58-.2 1.25-.31 2-.31 1.08 0 2.09.2 3 .49V5.5a.5.5 0 0 0-.5-.5H14c-.55 0-1 .45-1 1Z" /></svg>
+            <span>คลังปีศาจ</span>
+          </a>
+        </nav>
+
+      </aside>
+
+      <main id="main-content" class="main-content">
+        <header class="topbar">
+          <div class="mobile-brand">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 32 32"><path d="M8.2 5.7 13 9.2h6l4.8-3.5-.9 6.2a11 11 0 1 1-13.8 0l-.9-6.2Zm4.1 10.9a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7.4 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM12.5 24a5.1 5.1 0 0 0 7 0h-7Z" /></svg>
+            </span>
+            <strong>DemonDex</strong>
+          </div>
+          <div class="page-heading">
+            <h1>ปีศาจรีไซเคิล</h1>
+          </div>
+          <div class="account-panel">
+            <div class="account-copy">
+              <strong id="account-label">ผู้เยี่ยมชม</strong>
+              <small id="data-mode-label">กำลังเชื่อมต่อ...</small>
+            </div>
+            <button id="auth-button" class="button button-secondary" type="button" data-action="open-auth" hidden>
+              เข้าสู่ระบบ
+            </button>
+          </div>
+        </header>
+
+        <section class="content" id="library" aria-labelledby="library-title">
+          <h2 id="library-title" class="sr-only">คลังรายชื่อปีศาจ</h2>
+
+          <section class="search-panel" aria-label="ค้นหาปีศาจ">
+            <div class="search-intro">
+              <h2>ค้นหาปีศาจ</h2>
+              <p>พิมพ์ชื่อเพื่อกรองรายการทันที</p>
+            </div>
+            <div class="search-actions">
+              <div class="search-field">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.7 19.3-4.2-4.2a7.5 7.5 0 1 0-1.4 1.4l4.2 4.2a1 1 0 0 0 1.4-1.4ZM5 10.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" /></svg>
+                <label class="sr-only" for="search-input">ค้นหาชื่อปีศาจ</label>
+                <input id="search-input" type="search" placeholder="พิมพ์ชื่อปีศาจที่ต้องการ..." autocomplete="off" />
+              </div>
+              <button class="button button-primary primary-add" type="button" data-action="add" aria-label="เพิ่มปีศาจ">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5a1 1 0 1 0-2 0v6H5a1 1 0 1 0 0 2h6v6a1 1 0 1 0 2 0v-6h6a1 1 0 1 0 0-2h-6V5Z" /></svg>
+                <span>เพิ่มปีศาจ</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="stats-grid" aria-label="ภาพรวมข้อมูล">
+            <article class="stat-card stat-total">
+              <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 5h12V6H6v2Zm0 5h12v-2H6v2Zm0 5h8v-2H6v2Z" /></svg></span>
+              <div><span>ปีศาจทั้งหมด</span><strong id="total-count">0</strong></div>
+            </article>
+            <article class="stat-card stat-result">
+              <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 5.3-2l4.35 4.35a1 1 0 0 1-1.42 1.42l-4.35-4.35A7.96 7.96 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" /></svg></span>
+              <div><span>ผลลัพธ์ที่พบ</span><strong id="result-count">0</strong></div>
+            </article>
+          </section>
+
+          <section class="data-panel" aria-label="รายชื่อปีศาจ">
+            <div class="filter-toolbar">
+              <div class="filter-scroll" role="group" aria-label="กรองตามธาตุ">
+                <button class="filter-chip is-active" type="button" data-element="all" aria-pressed="true">
+                  ทั้งหมด <span data-count="all">0</span>
+                </button>
+                <button class="filter-chip element-earth" type="button" data-element="earth" aria-pressed="false">
+                  <i aria-hidden="true"></i>ดิน <span data-count="earth">0</span>
+                </button>
+                <button class="filter-chip element-water" type="button" data-element="water" aria-pressed="false">
+                  <i aria-hidden="true"></i>น้ำ <span data-count="water">0</span>
+                </button>
+                <button class="filter-chip element-wind" type="button" data-element="wind" aria-pressed="false">
+                  <i aria-hidden="true"></i>ลม <span data-count="wind">0</span>
+                </button>
+                <button class="filter-chip element-fire" type="button" data-element="fire" aria-pressed="false">
+                  <i aria-hidden="true"></i>ไฟ <span data-count="fire">0</span>
+                </button>
+              </div>
+              <label class="sort-control" for="sort-select">
+                <span>เรียงตาม</span>
+                <select id="sort-select" name="sort">
+                  <option value="name-asc">ชื่อ ก → ฮ</option>
+                  <option value="name-desc">ชื่อ ฮ → ก</option>
+                  <option value="updated-desc">ล่าสุด</option>
+                </select>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7.4 9.4 4.6 4.6 4.6-4.6a1 1 0 1 1 1.4 1.4l-5.3 5.3a1 1 0 0 1-1.4 0L6 10.8a1 1 0 0 1 1.4-1.4Z" /></svg>
+              </label>
+            </div>
+
+            <div class="result-summary" aria-live="polite">
+              <p id="result-summary-text">กำลังแสดงข้อมูลทั้งหมด</p>
+              <button id="clear-filter-button" class="text-button" type="button" hidden>ล้างตัวกรอง</button>
+            </div>
+
+            <nav id="alphabet-nav" class="alphabet-nav" aria-label="ข้ามไปยังรายชื่อตามตัวอักษร" hidden>
+              <span>ไปที่ตัวอักษร</span>
+              <div id="alphabet-list" class="alphabet-list"></div>
+            </nav>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" aria-sort="ascending" data-sort-header="name">
+                      <button class="column-sort is-active" type="button" data-sort="name">
+                        ชื่อปีศาจ
+                        <svg class="column-sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                          <path class="sort-arrow" d="M6 4a1 1 0 0 1 1 1v11.6l2.3-2.3a1 1 0 0 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.4L5 16.6V5a1 1 0 0 1 1-1Z" />
+                          <path d="M13 6a1 1 0 0 1 1-1h7a1 1 0 1 1 0 2h-7a1 1 0 0 1-1-1Zm0 6a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2h-5a1 1 0 0 1-1-1Zm0 6a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Z" />
+                        </svg>
+                      </button>
+                    </th>
+                    <th scope="col">ธาตุ</th>
+                    <th scope="col"><span class="sr-only">การจัดการ</span></th>
+                  </tr>
+                </thead>
+                <tbody id="demon-table-body"></tbody>
+              </table>
+            </div>
+
+            <div id="demon-card-list" class="card-list"></div>
+
+            <div id="empty-state" class="empty-state" hidden>
+              <h3>ไม่พบปีศาจที่ตรงกับการค้นหา</h3>
+              <p>ลองเปลี่ยนคำค้นหรือเลือกธาตุอื่น</p>
+              <button class="button button-secondary" type="button" data-action="clear">ล้างการค้นหา</button>
+            </div>
+          </section>
+
+        </section>
+      </main>
+    </div>
+
+    <dialog id="demon-dialog" class="modal" aria-labelledby="form-title">
+      <form id="demon-form" method="dialog" novalidate>
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Demon profile</p>
+            <h2 id="form-title">เพิ่มปีศาจ</h2>
+            <p id="form-description">กรอกชื่อและเลือกธาตุประจำตัว</p>
+          </div>
+          <button class="icon-button modal-close" type="button" data-action="close-form" aria-label="ปิดหน้าต่าง">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.7 5.3a1 1 0 0 0-1.4 1.4l5.3 5.3-5.3 5.3a1 1 0 1 0 1.4 1.4l5.3-5.3 5.3 5.3a1 1 0 0 0 1.4-1.4L13.4 12l5.3-5.3a1 1 0 0 0-1.4-1.4L12 10.6 6.7 5.3Z" /></svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <label class="field-group" for="demon-name">
+            <span>ชื่อปีศาจ <i>*</i></span>
+            <input id="demon-name" name="name" type="text" maxlength="80" placeholder="เช่น อัคนีเขี้ยวเพลิง" autocomplete="off" required />
+            <small id="name-hint">ใช้ชื่อที่จำและค้นหาได้ง่าย</small>
+            <strong id="name-error" class="field-error" role="alert"></strong>
+          </label>
+
+          <fieldset class="element-picker">
+            <legend>เลือกธาตุ <i>*</i></legend>
+            <div class="element-options">
+              <label class="element-option element-earth">
+                <input type="radio" name="element" value="earth" required />
+                <span class="radio-ui">
+                  <b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18v3H3v-3Zm3-5h12v3H6v-3Zm3-5h6v3H9V7Zm3-5 3 3H9l3-3Z" /></svg></b>
+                  <strong>ดิน</strong>
+                  <small>Earth</small>
+                </span>
+              </label>
+              <label class="element-option element-water">
+                <input type="radio" name="element" value="water" />
+                <span class="radio-ui">
+                  <b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4 6.34 9.17a7.4 7.4 0 1 0 11.32 0L12 2.4Zm0 17.6a5.4 5.4 0 0 1-4.12-8.9L12 6.17l4.12 4.93A5.4 5.4 0 0 1 12 20Z" /></svg></b>
+                  <strong>น้ำ</strong>
+                  <small>Water</small>
+                </span>
+              </label>
+              <label class="element-option element-wind">
+                <input type="radio" name="element" value="wind" />
+                <span class="radio-ui">
+                  <b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3 1 1 0 0 0 2 0 1 1 0 1 1 1 1H3a1 1 0 0 0 0 2Zm0 5h16a3 3 0 1 1-3 3 1 1 0 1 1 2 0 1 1 0 1 0 1-1H3a1 1 0 1 1 0-2Zm0-3h18a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2Z" /></svg></b>
+                  <strong>ลม</strong>
+                  <small>Wind</small>
+                </span>
+              </label>
+              <label class="element-option element-fire">
+                <input type="radio" name="element" value="fire" />
+                <span class="radio-ui">
+                  <b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.3 2.4c.58 3.26-.26 4.98-1.75 6.22.1-1.6-.65-2.9-1.83-3.82.04 3.04-4.22 5.43-4.22 10.3A6.5 6.5 0 0 0 12 21.6a6.5 6.5 0 0 0 6.5-6.5c0-4.28-2.39-9.8-5.2-12.7ZM12 19.6a4.5 4.5 0 0 1-4.5-4.5c0-2.08 1.16-3.57 2.18-4.88.53.84 1.17 1.88 1.6 3.23 2.5-1.32 3.55-3.2 3.74-5.25a15.8 15.8 0 0 1 1.48 6.9 4.5 4.5 0 0 1-4.5 4.5Z" /></svg></b>
+                  <strong>ไฟ</strong>
+                  <small>Fire</small>
+                </span>
+              </label>
+            </div>
+            <strong id="element-error" class="field-error" role="alert"></strong>
+          </fieldset>
+        </div>
+
+        <div class="modal-footer">
+          <button class="button button-secondary" type="button" data-action="close-form">ยกเลิก</button>
+          <button id="submit-button" class="button button-primary" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.55 17.6-5.2-5.2a1 1 0 0 1 1.42-1.42l4.13 4.14 8.34-9.38a1 1 0 0 1 1.5 1.33l-9.05 10.18a1 1 0 0 1-1.44.06l.3.29Z" /></svg>
+            <span id="submit-label">บันทึกข้อมูล</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="delete-dialog" class="modal modal-small" aria-labelledby="delete-title">
+      <div class="delete-content">
+        <span class="danger-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 14a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 16Zm1-3a1 1 0 1 1-2 0V6.5a1 1 0 1 1 2 0V13Z" /></svg></span>
+        <h2 id="delete-title">ลบปีศาจตัวนี้?</h2>
+        <p>คุณกำลังจะลบ <strong id="delete-name"></strong> ข้อมูลที่ลบแล้วไม่สามารถเรียกคืนได้</p>
+        <div class="delete-actions">
+          <button class="button button-secondary" type="button" data-action="cancel-delete">ยกเลิก</button>
+          <button id="confirm-delete-button" class="button button-danger" type="button" data-action="confirm-delete">ลบข้อมูล</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="auth-dialog" class="modal modal-auth" aria-labelledby="auth-title">
+      <form id="auth-form" novalidate>
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Team access</p>
+            <h2 id="auth-title">เข้าสู่ระบบผู้ดูแล</h2>
+            <p>เฉพาะบัญชีผู้ดูแลเท่านั้นที่เพิ่ม แก้ไข และลบข้อมูลได้</p>
+          </div>
+          <button class="icon-button modal-close" type="button" data-action="close-auth" aria-label="ปิดหน้าต่าง">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.7 5.3a1 1 0 0 0-1.4 1.4l5.3 5.3-5.3 5.3a1 1 0 1 0 1.4 1.4l5.3-5.3 5.3 5.3a1 1 0 0 0 1.4-1.4L13.4 12l5.3-5.3a1 1 0 0 0-1.4-1.4L12 10.6 6.7 5.3Z" /></svg>
+          </button>
+        </div>
+        <div class="modal-body auth-fields">
+          <label class="field-group" for="auth-username">
+            <span>ชื่อผู้ใช้</span>
+            <input id="auth-username" name="username" type="text" autocomplete="username" placeholder="กรอกชื่อผู้ใช้" autocapitalize="none" spellcheck="false" required />
+          </label>
+          <label class="field-group" for="auth-password">
+            <span>รหัสผ่าน</span>
+            <input id="auth-password" name="password" type="password" minlength="6" autocomplete="current-password" placeholder="อย่างน้อย 6 ตัวอักษร" required />
+          </label>
+          <strong id="auth-error" class="field-error" role="alert"></strong>
+        </div>
+        <div class="modal-footer auth-actions">
+          <button id="sign-in-button" class="button button-primary" type="submit">เข้าสู่ระบบ</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>
